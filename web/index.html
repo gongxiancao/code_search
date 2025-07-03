@@ -13,7 +13,18 @@
     .result:hover { box-shadow: 0 4px 16px #0002; }
     mark { background: #ffe066; color: #222; border-radius: 2px; padding: 0 2px; }
     .file { color: #2a7ae2; font-weight: bold; }
-    .line { color: #888; }
+    .line-label {
+      display: inline-block;
+      min-width: 2.5em;
+      text-align: right;
+      background: #e0e3e8;
+      color: #666;
+      border-radius: 4px;
+      font-size: 0.95em;
+      padding: 0.1em 0.7em 0.1em 0.5em;
+      margin-right: 0.7em;
+      font-family: 'JetBrains Mono', 'Fira Mono', 'Menlo', monospace;
+    }
     .content { font-family: 'JetBrains Mono', 'Fira Mono', 'Menlo', monospace; white-space: pre-wrap; background: #f8f8fa; display: block; padding: 0.5em 1em; border-radius: 4px; margin-top: 0.5em; }
     #results { margin-top: 2em; }
     .pagination { margin: 2em 0 1em 0; text-align: center; }
@@ -56,10 +67,16 @@
       currentPage = page;
       resultsDiv.innerHTML = data.map(r => `
         <div class="result">
-          <a href="viewer.html?file=${encodeURIComponent(r.file)}&line=${r.line}" target="_blank">
-            <span class="file">${r.file}</span> <span class="line">: ${r.line}</span>
+          <a href="viewer.html?file=${encodeURIComponent(r.file)}" target="_blank">
+            <span class="file">${r.file}</span>
           </a>
-          <span class="content">${r.content}</span>
+          <div style="margin-top:0.5em;">
+            ${r.matches.map(m => `
+              <a href="viewer.html?file=${encodeURIComponent(r.file)}&line=${m.line}" target="_blank" style="text-decoration:none;">
+                <span class="line-label">${m.line}</span><span class="content" style="display:inline;background:none;padding:0;">${m.content}</span>
+              </a><br>
+            `).join('')}
+          </div>
         </div>
       `).join('');
       // 分页控件美化
