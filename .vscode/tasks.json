@@ -1,0 +1,12 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run Code Search",
+      "type": "shell",
+      "command": "node search.js test",
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}
