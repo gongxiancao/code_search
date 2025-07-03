@@ -48,23 +48,48 @@
     let totalPages = 1;
     const pageSize = 20;
 
-    async function doSearch(page = 1) {
+    // 解析和设置URL参数
+    function setQueryToURL(keyword, dir, page) {
+      const params = new URLSearchParams();
+      if (keyword) params.set('keyword', keyword);
+      if (dir) params.set('dir', dir);
+      if (page > 1) params.set('page', page);
+      history.replaceState(null, '', '?' + params.toString());
+    }
+    function getQueryFromURL() {
+      const params = new URLSearchParams(location.search);
+      return {
+        keyword: params.get('keyword') || '',
+        dir: params.get('dir') || '',
+        page: parseInt(params.get('page') || '1', 10)
+      };
+    }
+
+    async function doSearch(page = 1, restore = false) {
       resultsDiv.innerHTML = '搜索中...';
-      const keyword = document.getElementById('keyword').value.trim();
-      const dir = document.getElementById('dir').value.trim();
+      let keyword, dir;
+      if (restore) {
+        const q = getQueryFromURL();
+        keyword = q.keyword;
+        dir = q.dir;
+        currentPage = q.page;
+        document.getElementById('keyword').value = keyword;
+        document.getElementById('dir').value = dir;
+      } else {
+        keyword = document.getElementById('keyword').value.trim();
+        dir = document.getElementById('dir').value.trim();
+        currentPage = page;
+      }
       lastQuery = { keyword, dir };
-      const res = await fetch('/api/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ keyword, dir, page, pageSize })
-      });
+      setQueryToURL(keyword, dir, currentPage);
+      const params = new URLSearchParams({ keyword, dir, page: currentPage, pageSize });
+      const res = await fetch('/api/search?' + params.toString());
       const { total, data } = await res.json();
       if (!total) {
         resultsDiv.innerHTML = '<p>未找到匹配项。</p>';
         return;
       }
       totalPages = Math.ceil(total / pageSize);
-      currentPage = page;
       resultsDiv.innerHTML = data.map(r => `
         <div class="result">
           <a href="viewer.html?file=${encodeURIComponent(r.file)}" target="_blank">
@@ -98,6 +123,12 @@
     form.onsubmit = (e) => {
       e.preventDefault();
       doSearch(1);
+    };
+
+    // 页面加载时根据URL参数自动搜索
+    window.onload = () => {
+      const q = getQueryFromURL();
+      if (q.keyword) doSearch(q.page || 1, true);
     };
   </script>
 </body>

@@ -15,7 +15,7 @@ function isCodeFile(file) {
 }
 
 async function searchInFile(filePath, keyword) {
-  const results = [];
+  const matches = [];
   const rl = readline.createInterface({
     input: fs.createReadStream(filePath),
     crlfDelay: Infinity
@@ -24,12 +24,11 @@ async function searchInFile(filePath, keyword) {
   for await (const line of rl) {
     lineNum++;
     if (line.includes(keyword)) {
-      // 高亮关键词
       const highlighted = line.replace(new RegExp(keyword, 'g'), `<mark>${keyword}</mark>`);
-      results.push({ file: filePath, line: lineNum, content: highlighted });
+      matches.push({ line: lineNum, content: highlighted });
     }
   }
-  return results;
+  return matches.length ? { file: filePath, matches } : null;
 }
 
 async function walk(targetPath, keyword) {
@@ -42,19 +41,29 @@ async function walk(targetPath, keyword) {
       if (entry.isDirectory()) {
         results = results.concat(await walk(fullPath, keyword));
       } else if (entry.isFile() && isCodeFile(entry.name)) {
-        results = results.concat(await searchInFile(fullPath, keyword));
+        const res = await searchInFile(fullPath, keyword);
+        if (res) results.push(res);
       }
     }
   } else if (stat.isFile() && isCodeFile(targetPath)) {
-    results = results.concat(await searchInFile(targetPath, keyword));
+    const res = await searchInFile(targetPath, keyword);
+    if (res) results.push(res);
   }
   return results;
 }
 
 
-// 支持分页：page, pageSize
-app.post('/api/search', async (req, res) => {
-  const { keyword, dir, page = 1, pageSize = 20 } = req.body;
+// 支持分页：page, pageSize，每个文件一条，matches为多行
+async function handleSearch(req, res, isPost) {
+  let keyword, dir, page, pageSize;
+  if (isPost) {
+    ({ keyword, dir, page = 1, pageSize = 20 } = req.body);
+  } else {
+    keyword = req.query.keyword;
+    dir = req.query.dir;
+    page = parseInt(req.query.page || '1', 10);
+    pageSize = parseInt(req.query.pageSize || '20', 10);
+  }
   if (!keyword) return res.json({ total: 0, data: [] });
   const baseDir = dir || process.cwd();
   const results = await walk(baseDir, keyword);
@@ -63,7 +72,10 @@ app.post('/api/search', async (req, res) => {
   const end = start + pageSize;
   const data = results.slice(start, end);
   res.json({ total, data });
-});
+}
+
+app.post('/api/search', (req, res) => handleSearch(req, res, true));
+app.get('/api/search', (req, res) => handleSearch(req, res, false));
 
 // 新增：返回文件内容（带行号数组）
 app.get('/api/file', (req, res) => {
