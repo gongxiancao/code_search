@@ -52,12 +52,17 @@ async function walk(targetPath, keyword) {
 }
 
 
+// 支持分页：page, pageSize
 app.post('/api/search', async (req, res) => {
-  const { keyword, dir } = req.body;
-  if (!keyword) return res.json([]);
+  const { keyword, dir, page = 1, pageSize = 20 } = req.body;
+  if (!keyword) return res.json({ total: 0, data: [] });
   const baseDir = dir || process.cwd();
   const results = await walk(baseDir, keyword);
-  res.json(results);
+  const total = results.length;
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize;
+  const data = results.slice(start, end);
+  res.json({ total, data });
 });
 
 // 新增：返回文件内容（带行号数组）
