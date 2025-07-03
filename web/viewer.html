@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>代码预览</title>
+  <style>
+    body { font-family: monospace; margin: 2em; }
+    .file { color: #2a7ae2; font-size: 1.1em; }
+    .line { color: #888; }
+    .code { background: #f8f8f8; padding: 1em; border-radius: 6px; overflow-x: auto; }
+    .highlight { background: #ffe066; color: #222; }
+    .ln { display: inline-block; width: 3em; text-align: right; color: #bbb; margin-right: 1em; }
+  </style>
+</head>
+<body>
+  <div class="file" id="file"></div>
+  <div class="code" id="code"></div>
+  <script>
+    // 获取 url 参数
+    function getQuery(name) {
+      const m = location.search.match(new RegExp('(?:[?&]' + name + '=)([^&]+)'));
+      return m ? decodeURIComponent(m[1]) : '';
+    }
+    const file = getQuery('file');
+    const line = parseInt(getQuery('line'), 10);
+    document.getElementById('file').textContent = file + (line ? ' : ' + line : '');
+    fetch('/api/file?file=' + encodeURIComponent(file)).then(r => r.json()).then(data => {
+      const codeDiv = document.getElementById('code');
+      if (!data.lines) { codeDiv.textContent = '无法读取文件'; return; }
+      codeDiv.innerHTML = data.lines.map((l, i) =>
+        `<span class="ln">${i+1}</span><span class="${i+1===line?'highlight':''}">${l.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`
+      ).join('<br>');
+      if (line) {
+        const el = codeDiv.querySelector('.highlight');
+        if (el) el.scrollIntoView({behavior:'smooth',block:'center'});
+      }
+    });
+  </script>
+</body>
+</html>

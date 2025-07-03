@@ -51,12 +51,25 @@ async function walk(targetPath, keyword) {
   return results;
 }
 
+
 app.post('/api/search', async (req, res) => {
   const { keyword, dir } = req.body;
   if (!keyword) return res.json([]);
   const baseDir = dir || process.cwd();
   const results = await walk(baseDir, keyword);
   res.json(results);
+});
+
+// 新增：返回文件内容（带行号数组）
+app.get('/api/file', (req, res) => {
+  const file = req.query.file;
+  if (!file || !fs.existsSync(file)) return res.json({ lines: null });
+  try {
+    const lines = fs.readFileSync(file, 'utf-8').split(/\r?\n/);
+    res.json({ lines });
+  } catch {
+    res.json({ lines: null });
+  }
 });
 
 app.listen(PORT, () => {

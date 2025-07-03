@@ -41,7 +41,9 @@
       }
       resultsDiv.innerHTML = data.map(r => `
         <div class="result">
-          <span class="file">${r.file}</span> : <span class="line">${r.line}</span><br>
+          <a href="viewer.html?file=${encodeURIComponent(r.file)}&line=${r.line}" target="_blank">
+            <span class="file">${r.file}</span> : <span class="line">${r.line}</span>
+          </a><br>
           <span class="content">${r.content}</span>
         </div>
       `).join('');
