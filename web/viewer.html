@@ -10,26 +10,53 @@
     .code { background: #f8f8f8; padding: 1em; border-radius: 6px; overflow-x: auto; white-space: pre; font-family: 'Fira Mono', 'Menlo', 'Consolas', 'monospace'; }
     .highlight { background: #ffe066; color: #222; }
     .ln { display: inline-block; width: 3em; text-align: right; color: #bbb; margin-right: 1em; }
-  </style>
+</style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/dart.min.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/typescript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/java.min.js"></script> -->
+  <script>
+    // hljs.registerLanguage('dart', window.hljsDefineDart);
+    // hljs.registerLanguage('javascript', window.hljsDefineJavascript);
+    // hljs.registerLanguage('typescript', window.hljsDefineTypescript);
+    // hljs.registerLanguage('python', window.hljsDefinePython);
+    // hljs.registerLanguage('java', window.hljsDefineJava);
+  </script>
 </head>
 <body>
   <div class="file" id="file"></div>
-  <div class="code" id="code"></div>
+  <div class="code"><pre><code id="code" class=""></code></pre></div>
   <script>
     // 获取 url 参数
     function getQuery(name) {
       const m = location.search.match(new RegExp('(?:[?&]' + name + '=)([^&]+)'));
       return m ? decodeURIComponent(m[1]) : '';
     }
+    function getLangByExt(file) {
+      const ext = file.split('.').pop().toLowerCase();
+      if (ext === 'js') return 'javascript';
+      if (ext === 'ts') return 'typescript';
+      if (ext === 'py') return 'python';
+      if (ext === 'java') return 'java';
+      if (ext === 'dart') return 'dart';
+      return '';
+    }
     const file = getQuery('file');
     const line = parseInt(getQuery('line'), 10);
     document.getElementById('file').textContent = file + (line ? ' : ' + line : '');
+    const lang = getLangByExt(file);
+    const codeEl = document.getElementById('code');
+    if (lang) codeEl.className = 'language-' + lang;
     fetch('/api/file?file=' + encodeURIComponent(file)).then(r => r.json()).then(data => {
       const codeDiv = document.getElementById('code');
       if (!data.lines) { codeDiv.textContent = '无法读取文件'; return; }
       codeDiv.innerHTML = data.lines.map((l, i) =>
         `<span class="ln">${i+1}</span><span class="${i+1===line?'highlight':''}" style="white-space: pre;">${l.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`
       ).join('\n');
+      hljs.highlightAll();
       if (line) {
         const el = codeDiv.querySelector('.highlight');
         if (el) el.scrollIntoView({behavior:'smooth',block:'center'});
