@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>本地代码搜索</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; }
+    input, button { font-size: 1em; }
+    .result { margin: 1em 0; padding: 0.5em; border-bottom: 1px solid #eee; }
+    mark { background: #ffe066; color: #222; }
+    .file { color: #2a7ae2; }
+    .line { color: #888; }
+    .content { font-family: monospace; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>本地代码搜索</h1>
+  <form id="searchForm">
+    <input type="text" id="keyword" placeholder="输入关键词" required />
+    <input type="text" id="dir" placeholder="搜索目录（可选）" style="width: 18em;" />
+    <button type="submit">搜索</button>
+  </form>
+  <div id="results"></div>
+  <script>
+    const form = document.getElementById('searchForm');
+    const resultsDiv = document.getElementById('results');
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      resultsDiv.innerHTML = '搜索中...';
+      const keyword = document.getElementById('keyword').value.trim();
+      const dir = document.getElementById('dir').value.trim();
+      const res = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keyword, dir })
+      });
+      const data = await res.json();
+      if (!data.length) {
+        resultsDiv.innerHTML = '<p>未找到匹配项。</p>';
+        return;
+      }
+      resultsDiv.innerHTML = data.map(r => `
+        <div class="result">
+          <span class="file">${r.file}</span> : <span class="line">${r.line}</span><br>
+          <span class="content">${r.content}</span>
+        </div>
+      `).join('');
+    };
+  </script>
+</body>
+</html>
