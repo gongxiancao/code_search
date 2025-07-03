@@ -4,7 +4,7 @@ import path from 'path';
 import readline from 'readline';
 import chalk from 'chalk';
 
-const exts = ['.js', '.ts', '.py', '.java', '.c', '.cpp', '.go', '.rb', '.cs', '.php', '.rs', '.swift', '.kt', '.m', '.scala'];
+const exts = ['.js', '.ts', '.py', '.java', '.c', '.cpp', '.go', '.rb', '.cs', '.php', '.rs', '.swift', '.kt', '.m', '.scala', '.dart'];
 
 function isCodeFile(file) {
   return exts.includes(path.extname(file));
@@ -26,15 +26,22 @@ function searchInFile(filePath, keyword) {
   });
 }
 
-function walk(dir, keyword) {
-  fs.readdirSync(dir, { withFileTypes: true }).forEach((entry) => {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      walk(fullPath, keyword);
-    } else if (entry.isFile() && isCodeFile(entry.name)) {
-      searchInFile(fullPath, keyword);
-    }
-  });
+
+function walk(targetPath, keyword) {
+  if (!fs.existsSync(targetPath)) return;
+  const stat = fs.statSync(targetPath);
+  if (stat.isDirectory()) {
+    fs.readdirSync(targetPath, { withFileTypes: true }).forEach((entry) => {
+      const fullPath = path.join(targetPath, entry.name);
+      if (entry.isDirectory()) {
+        walk(fullPath, keyword);
+      } else if (entry.isFile() && isCodeFile(entry.name)) {
+        searchInFile(fullPath, keyword);
+      }
+    });
+  } else if (stat.isFile() && isCodeFile(targetPath)) {
+    searchInFile(targetPath, keyword);
+  }
 }
 
 function main() {
