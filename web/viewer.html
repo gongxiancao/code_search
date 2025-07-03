@@ -7,7 +7,7 @@
     body { font-family: monospace; margin: 2em; }
     .file { color: #2a7ae2; font-size: 1.1em; }
     .line { color: #888; }
-    .code { background: #f8f8f8; padding: 1em; border-radius: 6px; overflow-x: auto; }
+    .code { background: #f8f8f8; padding: 1em; border-radius: 6px; overflow-x: auto; white-space: pre; font-family: 'Fira Mono', 'Menlo', 'Consolas', 'monospace'; }
     .highlight { background: #ffe066; color: #222; }
     .ln { display: inline-block; width: 3em; text-align: right; color: #bbb; margin-right: 1em; }
   </style>
@@ -28,8 +28,8 @@
       const codeDiv = document.getElementById('code');
       if (!data.lines) { codeDiv.textContent = '无法读取文件'; return; }
       codeDiv.innerHTML = data.lines.map((l, i) =>
-        `<span class="ln">${i+1}</span><span class="${i+1===line?'highlight':''}">${l.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`
-      ).join('<br>');
+        `<span class="ln">${i+1}</span><span class="${i+1===line?'highlight':''}" style="white-space: pre;">${l.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`
+      ).join('\n');
       if (line) {
         const el = codeDiv.querySelector('.highlight');
         if (el) el.scrollIntoView({behavior:'smooth',block:'center'});

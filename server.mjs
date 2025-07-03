@@ -24,7 +24,9 @@ async function searchInFile(filePath, keyword) {
   for await (const line of rl) {
     lineNum++;
     if (line.includes(keyword)) {
-      const highlighted = line.replace(new RegExp(keyword, 'g'), `<mark>${keyword}</mark>`);
+      // 保留原始缩进，防止 HTML 渲染时丢失空格
+      const safeLine = line.replace(/ /g, '&nbsp;').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+      const highlighted = safeLine.replace(new RegExp(keyword, 'g'), `<mark>${keyword}</mark>`);
       matches.push({ line: lineNum, content: highlighted });
     }
   }
