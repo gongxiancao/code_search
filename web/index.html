@@ -4,13 +4,21 @@
   <meta charset="UTF-8">
   <title>本地代码搜索</title>
   <style>
-    body { font-family: sans-serif; margin: 2em; }
-    input, button { font-size: 1em; }
-    .result { margin: 1em 0; padding: 0.5em; border-bottom: 1px solid #eee; }
-    mark { background: #ffe066; color: #222; }
-    .file { color: #2a7ae2; }
+    body { font-family: 'Segoe UI', 'PingFang SC', Arial, sans-serif; margin: 2em; background: #f6f8fa; }
+    input, button { font-size: 1em; border-radius: 4px; border: 1px solid #ccc; padding: 0.3em 0.7em; }
+    button { background: #2a7ae2; color: #fff; border: none; cursor: pointer; transition: background 0.2s; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    button:not(:disabled):hover { background: #1558b0; }
+    .result { margin: 1em 0; padding: 1em; border-radius: 8px; background: #fff; box-shadow: 0 2px 8px #0001; border-left: 4px solid #2a7ae2; transition: box-shadow 0.2s; }
+    .result:hover { box-shadow: 0 4px 16px #0002; }
+    mark { background: #ffe066; color: #222; border-radius: 2px; padding: 0 2px; }
+    .file { color: #2a7ae2; font-weight: bold; }
     .line { color: #888; }
-    .content { font-family: monospace; white-space: pre-wrap; }
+    .content { font-family: 'JetBrains Mono', 'Fira Mono', 'Menlo', monospace; white-space: pre-wrap; background: #f8f8fa; display: block; padding: 0.5em 1em; border-radius: 4px; margin-top: 0.5em; }
+    #results { margin-top: 2em; }
+    .pagination { margin: 2em 0 1em 0; text-align: center; }
+    .pagination button { margin: 0 0.5em; }
+    .pagination input { width: 3em; text-align: center; }
   </style>
 </head>
 <body>
@@ -49,17 +57,17 @@
       resultsDiv.innerHTML = data.map(r => `
         <div class="result">
           <a href="viewer.html?file=${encodeURIComponent(r.file)}&line=${r.line}" target="_blank">
-            <span class="file">${r.file}</span> : <span class="line">${r.line}</span>
-          </a><br>
+            <span class="file">${r.file}</span> <span class="line">: ${r.line}</span>
+          </a>
           <span class="content">${r.content}</span>
         </div>
       `).join('');
-      // 分页控件
-      resultsDiv.innerHTML += `<div style="margin:1em 0;">
+      // 分页控件美化
+      resultsDiv.innerHTML += `<div class="pagination">
         <button id="prevPage" ${currentPage===1?'disabled':''}>上一页</button>
-        <span>第 ${currentPage} / ${totalPages} 页</span>
+        <span>第 <b>${currentPage}</b> / <b>${totalPages}</b> 页</span>
         <button id="nextPage" ${currentPage===totalPages?'disabled':''}>下一页</button>
-        跳转到 <input id="gotoPage" type="number" min="1" max="${totalPages}" value="${currentPage}" style="width:3em;"> 页
+        跳转到 <input id="gotoPage" type="number" min="1" max="${totalPages}" value="${currentPage}"> 页
         <button id="goBtn">Go</button>
       </div>`;
       document.getElementById('prevPage').onclick = () => doSearch(currentPage-1);
