@@ -4,6 +4,18 @@
   <meta charset="UTF-8">
   <title>代码预览</title>
   <style>
+    /* highlightjs-line-numbers.js 行号右对齐 */
+    .hljs-ln-numbers {
+      text-align: right;
+      color: #bbb;
+      user-select: none;
+      background: transparent;
+      border-right: 1px solid #eee;
+      padding-right: 0.5em;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
     body { font-family: monospace; margin: 2em; }
     .file { color: #2a7ae2; font-size: 1.1em; }
     .line { color: #888; }
@@ -15,6 +27,7 @@
 </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/dart.min.js"></script>
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/javascript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/typescript.min.js"></script>
@@ -53,16 +66,27 @@
     const codeEl = document.getElementById('code');
     if (lang) codeEl.className = 'language-' + lang;
     fetch('/api/file?file=' + encodeURIComponent(file)).then(r => r.json()).then(data => {
-      const codeDiv = document.getElementById('code');
-      if (!data.lines) { codeDiv.textContent = '无法读取文件'; return; }
-      codeDiv.innerHTML = data.lines.map((l, i) =>
-        `<span class="ln">${i+1}</span><span class="${i+1===line?'highlight':''}" style="white-space: pre;">${l.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`
-      ).join('\n');
-      hljs.highlightAll();
-      if (line) {
-        const el = codeDiv.querySelector('.highlight');
-        if (el) el.scrollIntoView({behavior:'smooth',block:'center'});
-      }
+      if (!data.lines) { codeEl.textContent = '无法读取文件'; return; }
+      // 先移除所有 class，避免 className 累加
+      codeEl.className = '';
+      codeEl.textContent = data.lines.join('\n');
+      // 设置 class 以兼容行号插件
+      if (lang) codeEl.className = 'hljs language-' + lang;
+      else codeEl.className = 'hljs';
+      // 先高亮再加行号
+      if (window.hljs) hljs.highlightElement(codeEl);
+      setTimeout(() => {
+        if (window.hljs && window.hljs.lineNumbersBlock) hljs.lineNumbersBlock(codeEl);
+        // 高亮指定行
+        if (line) {
+          const lines = codeEl.querySelectorAll('.hljs-ln-code');
+          if (lines[line-1]) {
+            lines[line-1].style.background = '#ffe066';
+            lines[line-1].style.color = '#222';
+            lines[line-1].scrollIntoView({behavior:'smooth',block:'center'});
+          }
+        }
+      }, 0);
     });
   </script>
 </body>
