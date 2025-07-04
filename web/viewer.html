@@ -9,9 +9,10 @@
       text-align: right;
       color: #bbb;
       user-select: none;
-      background: transparent;
+      background: #e0e0e0; /* 行号背景色更深 */
       border-right: 1px solid #eee;
-      padding-right: 0.5em;
+      padding-right: 0.5em !important; /* 行号和代码内容间距 2em，强制生效 */
+      padding-left: 0.5em !important; /* 行号左侧间距 */
       display: flex;
       flex-direction: column;
       align-items: flex-end;
@@ -24,6 +25,7 @@
     .code code { margin: 0; display: block; padding: 0; }
     .highlight { background: #ffe066; color: #222; }
     .ln { display: inline-block; width: 3em; text-align: right; color: #bbb; margin-right: 1em; }
+    .hljs-ln-code { padding-left: 1em !important; }
 </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
