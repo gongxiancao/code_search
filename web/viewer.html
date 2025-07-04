@@ -81,12 +81,14 @@
         if (window.hljs && window.hljs.lineNumbersBlock) hljs.lineNumbersBlock(codeEl);
         // 高亮指定行
         if (line) {
-          const lines = codeEl.querySelectorAll('.hljs-ln-code');
-          if (lines[line-1]) {
-            lines[line-1].style.background = '#ffe066';
-            lines[line-1].style.color = '#222';
-            lines[line-1].scrollIntoView({behavior:'smooth',block:'center'});
-          }
+            setTimeout(() => {
+                const lines = codeEl.querySelectorAll('.hljs-ln-numbers');
+                if (lines[line-1]) {
+                    lines[line-1].style.background = '#ffe066';
+                    lines[line-1].style.color = '#222';
+                    lines[line-1].scrollIntoView({behavior:'smooth',block:'center'});
+                }
+            });
         }
       }, 0);
     });
