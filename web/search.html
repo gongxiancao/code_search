@@ -47,7 +47,6 @@
       return m ? decodeURIComponent(m[1]) : '';
     }
     const projectName = getQuery('project');
-    let projectPath = '';
     // 读取项目配置
     fetch('projects.json').then(r=>r.json()).then(list=>{
       const p = list.find(x=>x.name===projectName);
@@ -57,7 +56,6 @@
         return;
       }
       document.getElementById('project-title').textContent = p.name;
-      projectPath = p.path;
     });
     const form = document.getElementById('searchForm');
     const resultsDiv = document.getElementById('results');
@@ -70,8 +68,8 @@
       const keyword = document.getElementById('keyword').value.trim();
       lastQuery = { keyword };
       currentPage = page;
-      // 只传递 keyword 和项目路径
-      const params = new URLSearchParams({ keyword, dir: projectPath, page: currentPage, pageSize });
+      // 只传递 keyword 和项目名
+      const params = new URLSearchParams({ keyword, project: projectName, page: currentPage, pageSize });
       const res = await fetch('/api/search?' + params.toString());
       const { total, data } = await res.json();
       if (!total) {
@@ -81,12 +79,12 @@
       totalPages = Math.ceil(total / pageSize);
       resultsDiv.innerHTML = data.map(r => `
         <div class="result">
-          <a href="viewer.html?file=${encodeURIComponent(r.file)}" target="_blank">
-            <span class="file">${r.file}</span>
+          <a href="viewer.html?project=${encodeURIComponent(projectName)}&relative=${encodeURIComponent(r.relative)}">
+            <span class="file">/${projectName}/${r.relative}</span>
           </a>
           <div style="margin-top:0.5em;">
             ${r.matches.map(m => `
-              <a href="viewer.html?file=${encodeURIComponent(r.file)}&line=${m.line}" target="_blank" style="text-decoration:none;">
+              <a href="viewer.html?project=${encodeURIComponent(projectName)}&relative=${encodeURIComponent(r.relative)}&line=${m.line}" style="text-decoration:none;">
                 <span class="line-label">${m.line}</span><span class="content" style="display:inline;background:none;padding:0;">${m.content}</span>
               </a><br>
             `).join('')}
