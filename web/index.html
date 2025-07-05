@@ -34,102 +34,20 @@
 </head>
 <body>
   <h1>本地代码搜索</h1>
-  <form id="searchForm">
-    <input type="text" id="keyword" placeholder="输入关键词" required />
-    <input type="text" id="dir" placeholder="搜索目录（可选）" style="width: 18em;" />
-    <button type="submit">搜索</button>
-  </form>
-  <div id="results"></div>
+  <div id="project-list"></div>
   <script>
-    const form = document.getElementById('searchForm');
-    const resultsDiv = document.getElementById('results');
-    let lastQuery = {};
-    let currentPage = 1;
-    let totalPages = 1;
-    const pageSize = 20;
-
-    // 解析和设置URL参数
-    function setQueryToURL(keyword, dir, page) {
-      const params = new URLSearchParams();
-      if (keyword) params.set('keyword', keyword);
-      if (dir) params.set('dir', dir);
-      if (page > 1) params.set('page', page);
-      history.replaceState(null, '', '?' + params.toString());
-    }
-    function getQueryFromURL() {
-      const params = new URLSearchParams(location.search);
-      return {
-        keyword: params.get('keyword') || '',
-        dir: params.get('dir') || '',
-        page: parseInt(params.get('page') || '1', 10)
-      };
-    }
-
-    async function doSearch(page = 1, restore = false) {
-      resultsDiv.innerHTML = '搜索中...';
-      let keyword, dir;
-      if (restore) {
-        const q = getQueryFromURL();
-        keyword = q.keyword;
-        dir = q.dir;
-        currentPage = q.page;
-        document.getElementById('keyword').value = keyword;
-        document.getElementById('dir').value = dir;
-      } else {
-        keyword = document.getElementById('keyword').value.trim();
-        dir = document.getElementById('dir').value.trim();
-        currentPage = page;
-      }
-      lastQuery = { keyword, dir };
-      setQueryToURL(keyword, dir, currentPage);
-      const params = new URLSearchParams({ keyword, dir, page: currentPage, pageSize });
-      const res = await fetch('/api/search?' + params.toString());
-      const { total, data } = await res.json();
-      if (!total) {
-        resultsDiv.innerHTML = '<p>未找到匹配项。</p>';
+    // 读取项目列表
+    fetch('projects.json').then(r=>r.json()).then(list=>{
+      const div = document.getElementById('project-list');
+      if (!list.length) {
+        div.innerHTML = '<p>暂无可用项目。</p>';
         return;
       }
-      totalPages = Math.ceil(total / pageSize);
-      resultsDiv.innerHTML = data.map(r => `
-        <div class="result">
-          <a href="viewer.html?file=${encodeURIComponent(r.file)}" target="_blank">
-            <span class="file">${r.file}</span>
-          </a>
-          <div style="margin-top:0.5em;">
-            ${r.matches.map(m => `
-              <a href="viewer.html?file=${encodeURIComponent(r.file)}&line=${m.line}" target="_blank" style="text-decoration:none;">
-                <span class="line-label">${m.line}</span><span class="content" style="display:inline;background:none;padding:0;">${m.content}</span>
-              </a><br>
-            `).join('')}
-          </div>
-        </div>
-      `).join('');
-      // 分页控件美化
-      resultsDiv.innerHTML += `<div class="pagination">
-        <button id="prevPage" ${currentPage===1?'disabled':''}>上一页</button>
-        <span>第 <b>${currentPage}</b> / <b>${totalPages}</b> 页</span>
-        <button id="nextPage" ${currentPage===totalPages?'disabled':''}>下一页</button>
-        跳转到 <input id="gotoPage" type="number" min="1" max="${totalPages}" value="${currentPage}"> 页
-        <button id="goBtn">Go</button>
-      </div>`;
-      document.getElementById('prevPage').onclick = () => doSearch(currentPage-1);
-      document.getElementById('nextPage').onclick = () => doSearch(currentPage+1);
-      document.getElementById('goBtn').onclick = () => {
-        const val = parseInt(document.getElementById('gotoPage').value, 10);
-        if (val>=1 && val<=totalPages) doSearch(val);
-      };
-    }
-
-    form.onsubmit = (e) => {
-      e.preventDefault();
-      doSearch(1);
-    };
-
-    // 页面加载时根据URL参数自动搜索
-    window.onload = () => {
-      const q = getQueryFromURL();
-      if (q.keyword) doSearch(q.page || 1, true);
-    };
+      div.innerHTML = '<h2>请选择项目：</h2>' +
+        '<ul style="list-style:none;padding:0;">' +
+        list.map(p=>`<li style="margin:1em 0;"><a href="search.html?project=${encodeURIComponent(p.name)}" style="font-size:1.15em;color:#2a7ae2;text-decoration:none;font-weight:bold;">${p.name}</a> <span style="color:#888;font-size:0.98em;">(${p.path})</span></li>`).join('') +
+        '</ul>';
+    });
   </script>
 </body>
 </html>

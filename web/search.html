@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>项目代码搜索</title>
+  <style>
+    body { font-family: 'Segoe UI', 'PingFang SC', Arial, sans-serif; margin: 2em; background: #f6f8fa; }
+    input, button { font-size: 1em; border-radius: 4px; border: 1px solid #ccc; padding: 0.3em 0.7em; }
+    button { background: #2a7ae2; color: #fff; border: none; cursor: pointer; transition: background 0.2s; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    button:not(:disabled):hover { background: #1558b0; }
+    .result { margin: 1em 0; padding: 1em; border-radius: 8px; background: #fff; box-shadow: 0 2px 8px #0001; border-left: 4px solid #2a7ae2; transition: box-shadow 0.2s; }
+    .result:hover { box-shadow: 0 4px 16px #0002; }
+    mark { background: #ffe066; color: #222; border-radius: 2px; padding: 0 2px; }
+    .file { color: #2a7ae2; font-weight: bold; }
+    .line-label {
+      display: inline-block;
+      min-width: 2.5em;
+      text-align: right;
+      background: #e0e3e8;
+      color: #666;
+      border-radius: 4px;
+      font-size: 0.95em;
+      padding: 0.1em 0.7em 0.1em 0.5em;
+      margin-right: 0.7em;
+      font-family: 'JetBrains Mono', 'Fira Mono', 'Menlo', monospace;
+    }
+    .content { font-family: 'JetBrains Mono', 'Fira Mono', 'Menlo', monospace; white-space: pre-wrap; background: #f8f8fa; display: block; padding: 0.5em 1em; border-radius: 4px; margin-top: 0.5em; }
+    #results { margin-top: 2em; }
+    .pagination { margin: 2em 0 1em 0; text-align: center; }
+    .pagination button { margin: 0 0.5em; }
+    .pagination input { width: 3em; text-align: center; }
+  </style>
+</head>
+<body>
+  <a href="index.html" style="color:#2a7ae2;text-decoration:none;font-weight:bold;font-size:1.08em;">&lt; 返回项目列表</a>
+  <h2 id="project-title"></h2>
+  <form id="searchForm">
+    <input type="text" id="keyword" placeholder="输入关键词" required />
+    <button type="submit">搜索</button>
+  </form>
+  <div id="results"></div>
+  <script>
+    // 获取项目名
+    function getQuery(name) {
+      const m = location.search.match(new RegExp('(?:[?&]' + name + '=)([^&]+)'));
+      return m ? decodeURIComponent(m[1]) : '';
+    }
+    const projectName = getQuery('project');
+    let projectPath = '';
+    // 读取项目配置
+    fetch('projects.json').then(r=>r.json()).then(list=>{
+      const p = list.find(x=>x.name===projectName);
+      if (!p) {
+        document.getElementById('project-title').textContent = '未找到项目：'+projectName;
+        document.getElementById('searchForm').style.display = 'none';
+        return;
+      }
+      document.getElementById('project-title').textContent = p.name;
+      projectPath = p.path;
+    });
+    const form = document.getElementById('searchForm');
+    const resultsDiv = document.getElementById('results');
+    let lastQuery = {};
+    let currentPage = 1;
+    let totalPages = 1;
+    const pageSize = 20;
+    async function doSearch(page = 1) {
+      resultsDiv.innerHTML = '搜索中...';
+      const keyword = document.getElementById('keyword').value.trim();
+      lastQuery = { keyword };
+      currentPage = page;
+      // 只传递 keyword 和项目路径
+      const params = new URLSearchParams({ keyword, dir: projectPath, page: currentPage, pageSize });
+      const res = await fetch('/api/search?' + params.toString());
+      const { total, data } = await res.json();
+      if (!total) {
+        resultsDiv.innerHTML = '<p>未找到匹配项。</p>';
+        return;
+      }
+      totalPages = Math.ceil(total / pageSize);
+      resultsDiv.innerHTML = data.map(r => `
+        <div class="result">
+          <a href="viewer.html?file=${encodeURIComponent(r.file)}" target="_blank">
+            <span class="file">${r.file}</span>
+          </a>
+          <div style="margin-top:0.5em;">
+            ${r.matches.map(m => `
+              <a href="viewer.html?file=${encodeURIComponent(r.file)}&line=${m.line}" target="_blank" style="text-decoration:none;">
+                <span class="line-label">${m.line}</span><span class="content" style="display:inline;background:none;padding:0;">${m.content}</span>
+              </a><br>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+      // 分页控件美化
+      resultsDiv.innerHTML += `<div class="pagination">
+        <button id="prevPage" ${currentPage===1?'disabled':''}>上一页</button>
+        <span>第 <b>${currentPage}</b> / <b>${totalPages}</b> 页</span>
+        <button id="nextPage" ${currentPage===totalPages?'disabled':''}>下一页</button>
+        跳转到 <input id="gotoPage" type="number" min="1" max="${totalPages}" value="${currentPage}"> 页
+        <button id="goBtn">Go</button>
+      </div>`;
+      document.getElementById('prevPage').onclick = () => doSearch(currentPage-1);
+      document.getElementById('nextPage').onclick = () => doSearch(currentPage+1);
+      document.getElementById('goBtn').onclick = () => {
+        const val = parseInt(document.getElementById('gotoPage').value, 10);
+        if (val>=1 && val<=totalPages) doSearch(val);
+      };
+    }
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      doSearch(1);
+    };
+  </script>
+</body>
+</html>
