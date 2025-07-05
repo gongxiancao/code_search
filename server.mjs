@@ -55,20 +55,38 @@ async function walk(targetPath, keyword) {
 }
 
 
+
+// 读取项目配置
+function getProjects() {
+  try {
+    return JSON.parse(fs.readFileSync(path.join('web', 'projects.json'), 'utf-8'));
+  } catch {
+    return [];
+  }
+}
+
 // 支持分页：page, pageSize，每个文件一条，matches为多行
 async function handleSearch(req, res, isPost) {
-  let keyword, dir, page, pageSize;
+  let keyword, project, page, pageSize;
   if (isPost) {
-    ({ keyword, dir, page = 1, pageSize = 20 } = req.body);
+    ({ keyword, project, page = 1, pageSize = 20 } = req.body);
   } else {
     keyword = req.query.keyword;
-    dir = req.query.dir;
+    project = req.query.project;
     page = parseInt(req.query.page || '1', 10);
     pageSize = parseInt(req.query.pageSize || '20', 10);
   }
-  if (!keyword) return res.json({ total: 0, data: [] });
-  const baseDir = dir || process.cwd();
-  const results = await walk(baseDir, keyword);
+  if (!keyword || !project) return res.json({ total: 0, data: [] });
+  const projects = getProjects();
+  const proj = projects.find(p => p.name === project);
+  if (!proj) return res.json({ total: 0, data: [] });
+  const baseDir = proj.path;
+  // walk 返回绝对路径，需转为相对路径
+  const results = (await walk(baseDir, keyword)).map(r => ({
+    project,
+    relative: path.relative(baseDir, r.file),
+    matches: r.matches
+  }));
   const total = results.length;
   const start = (page - 1) * pageSize;
   const end = start + pageSize;
@@ -80,9 +98,15 @@ app.post('/api/search', (req, res) => handleSearch(req, res, true));
 app.get('/api/search', (req, res) => handleSearch(req, res, false));
 
 // 新增：返回文件内容（带行号数组）
+// 新增：根据 project+relative 返回文件内容
 app.get('/api/file', (req, res) => {
-  const file = req.query.file;
-  if (!file || !fs.existsSync(file)) return res.json({ lines: null });
+  const { project, relative } = req.query;
+  if (!project || !relative) return res.json({ lines: null });
+  const projects = getProjects();
+  const proj = projects.find(p => p.name === project);
+  if (!proj) return res.json({ lines: null });
+  const file = path.join(proj.path, relative);
+  if (!fs.existsSync(file)) return res.json({ lines: null });
   try {
     const lines = fs.readFileSync(file, 'utf-8').split(/\r?\n/);
     res.json({ lines });
