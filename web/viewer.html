@@ -73,9 +73,10 @@
       if (ext === 'dart') return 'dart';
       return '';
     }
-    const file = getQuery('file');
+    const project = getQuery('project');
+    const relative = getQuery('relative');
     const line = parseInt(getQuery('line'), 10);
-    const fileText = file + (line ? ':' + line : '');
+    const fileText = (project && relative) ? `/${project}/${relative}${line?(':'+line):''}` : '';
     document.getElementById('file-text').textContent = fileText;
     // 复制按钮
     const copyBtn = document.getElementById('copy-btn');
@@ -91,10 +92,10 @@
         }, 1200);
       });
     };
-    const lang = getLangByExt(file);
+    const lang = getLangByExt(relative || '');
     const codeEl = document.getElementById('code');
     if (lang) codeEl.className = 'language-' + lang;
-    fetch('/api/file?file=' + encodeURIComponent(file)).then(r => r.json()).then(data => {
+    fetch(`/api/file?project=${encodeURIComponent(project)}&relative=${encodeURIComponent(relative)}`).then(r => r.json()).then(data => {
       if (!data.lines) { codeEl.textContent = '无法读取文件'; return; }
       // 先移除所有 class，避免 className 累加
       codeEl.className = '';
