@@ -33,12 +33,14 @@
   </style>
 </head>
 <body>
-  <a href="index.html" style="color:#2a7ae2;text-decoration:none;font-weight:bold;font-size:1.08em;">&lt; 返回项目列表</a>
-  <h2 id="project-title"></h2>
-  <form id="searchForm">
-    <input type="text" id="keyword" placeholder="输入关键词" required />
-    <button type="submit">搜索</button>
-  </form>
+  <div style="display: flex; align-items: center; gap: 1.2em; margin-bottom: 1.2em; flex-wrap: wrap;">
+    <a href="index.html" style="color:#2a7ae2;text-decoration:none;font-weight:bold;font-size:1.08em; white-space:nowrap;">项目列表 &gt;</a>
+    <span id="project-title" style="font-size:1.15em; font-weight:bold; color:#222; white-space:nowrap;"></span> &gt;
+    <form id="searchForm" style="display:flex;align-items:center;gap:0.5em;margin:0;">
+      <input type="text" id="keyword" placeholder="输入关键词" required style="margin:0;" />
+      <button type="submit">搜索</button>
+    </form>
+  </div>
   <div id="results"></div>
   <script>
     // 获取项目名
