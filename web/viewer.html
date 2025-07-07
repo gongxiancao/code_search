@@ -17,7 +17,7 @@
       flex-direction: column;
       align-items: flex-end;
     }
-    body { font-family: monospace; margin: 2em; }
+    body { font-family: monospace; margin: 0; }
     .file { color: #2a7ae2; font-size: 1.1em; margin-bottom: 0.5em; }
     .line { color: #888; }
     .code { background: #f8f8f8; padding: 0; border-radius: 6px; overflow-x: auto; white-space: pre; font-family: 'Fira Mono', 'Menlo', 'Consolas', 'monospace'; margin: 0; }
@@ -45,8 +45,8 @@
 </head>
 <body>
   <div class="file" id="file" style="display: flex; align-items: center;">
-    <a href="index.html" id="home-link" style="color: #2a7ae2; text-decoration: none; font-weight: bold; font-size: 1.08em; margin-right: 1.2em;">Home</a>
-    <span id="file-breadcrumb" style="font-size: 1.15em;"></span>
+    <a href="index.html" id="home-link" style="color: #2a7ae2; text-decoration: none; font-weight: bold; font-size: 1.08em; margin-right: 0.5em;">Home</a> &gt;
+    <span id="file-breadcrumb" style="font-size: 1.15em; margin-left: 0.5em;"></span>
     <button id="copy-btn" title="复制文件名:行号" style="margin-left: 1em; background: none; border: none; cursor: pointer; padding: 0.2em; display: flex; align-items: center;">
       <!-- SVG copy icon (clone-line from SVG Repo, www.svgrepo.com) -->
       <svg id="copy-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 36 36" style="vertical-align: middle; color: #888;"><path d="M6,6H22v4h2V6a2,2,0,0,0-2-2H6A2,2,0,0,0,4,6V22a2,2,0,0,0,2,2h4V22H6Z" fill="#888"/><path d="M30,12H14a2,2,0,0,0-2,2V30a2,2,0,0,0,2,2H30a2,2,0,0,0,2-2V14A2,2,0,0,0,30,12Zm0,18H14V14H30Z" fill="#bbb"/><polygon points="21 28 23 28 23 23 28 23 28 21 23 21 23 16 21 16 21 21 16 21 16 23 21 23 21 28" fill="#888"/><rect x="0" y="0" width="36" height="36" fill-opacity="0"/></svg>

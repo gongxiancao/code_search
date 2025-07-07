@@ -129,11 +129,18 @@ app.get('/api/list', (req, res) => {
   try {
     const entries = fs.readdirSync(dir, { withFileTypes: true })
       .filter(e => !e.name.startsWith('.'))
-      .map(e => ({
-        name: e.name,
-        type: e.isDirectory() ? 'dir' : 'file',
-        relative: relative ? (relative + '/' + e.name) : e.name
-      }))
+      .map(e => {
+        const fullPath = path.join(dir, e.name);
+        let stat;
+        try { stat = fs.statSync(fullPath); } catch { stat = null; }
+        return {
+          name: e.name,
+          type: e.isDirectory() ? 'dir' : 'file',
+          relative: relative ? (relative + '/' + e.name) : e.name,
+          size: stat && !e.isDirectory() ? stat.size : undefined,
+          mtime: stat ? stat.mtime : undefined
+        };
+      })
       .sort((a, b) => a.type === b.type ? a.name.localeCompare(b.name) : (a.type === 'dir' ? -1 : 1));
     res.json({ entries });
   } catch {

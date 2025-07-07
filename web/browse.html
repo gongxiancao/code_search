@@ -4,20 +4,82 @@
   <meta charset="UTF-8">
   <title>项目目录浏览</title>
   <style>
-    body { font-family: 'Segoe UI', 'PingFang SC', Arial, sans-serif; margin: 2em; background: #f6f8fa; }
-    a { color: #2a7ae2; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    ul { list-style: none; padding-left: 1.2em; }
-    .dir { font-weight: bold; color: #1558b0; }
-    .file { color: #444; }
-    .breadcrumb { margin-bottom: 1.2em; font-size: 1.08em; }
-    .breadcrumb a { color: #2a7ae2; }
-    .breadcrumb span { color: #888; }
+    body {
+      font-family: 'Fira Mono', 'Menlo', 'Consolas', 'Segoe UI', 'PingFang SC', Arial, sans-serif;
+      margin: 0;
+      background: #f6f8fa;
+      color: #222;
+    }
+    a {
+      color: #2a7ae2;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    a:hover {
+      text-decoration: underline;
+      color: #1558b0;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+    }
+    .dir {
+      font-weight: bold;
+      color: #1558b0;
+      background: #eaf2fb;
+      border-radius: 5px;
+      padding: 0.3em 0.7em;
+      margin-bottom: 0.18em;
+      display: flex;
+      align-items: center;
+    }
+    .file {
+      color: #444;
+      background: #fff;
+      border-radius: 5px;
+      padding: 0.3em 0.7em;
+      margin-bottom: 0.18em;
+      display: flex;
+      align-items: center;
+    }
+    .breadcrumb {
+      font-size: 1.08em;
+      /* background: #f0f4f8; */
+      border-radius: 5px;
+      padding: 0.5em 1em;
+      color: #1558b0;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .breadcrumb a {
+      color: #2a7ae2;
+      font-weight: bold;
+      margin: 0 0.1em;
+    }
+    .breadcrumb a:hover {
+      color: #1558b0;
+    }
+    .breadcrumb span {
+      color: #888;
+      margin: 0 0.1em;
+    }
+    .icon {
+      margin-right: 0.5em;
+      font-size: 1.1em;
+      vertical-align: middle;
+    }
+    @media (max-width: 600px) {
+      body { margin: 0.5em; }
+      .breadcrumb { font-size: 0.98em; padding: 0.4em 0.5em; }
+      .dir, .file { padding: 0.2em 0.4em; font-size: 0.98em; }
+    }
   </style>
 </head>
 <body>
   <div class="breadcrumb" id="breadcrumb"></div>
-  <ul id="file-list"></ul>
+  <table id="file-table" style="width:100%;border-collapse:separate;border-spacing:0;"></table>
   <script>
     function getQuery(name) {
       const m = location.search.match(new RegExp('(?:[?&]' + name + '=)([^&]+)'));
@@ -29,7 +91,7 @@
     // 路径格式面包屑导航
     function renderBreadcrumb() {
       if (!project) return;
-      let html = `<a href="index.html">项目列表</a> &gt; <a href="browse.html?project=${encodeURIComponent(project)}">${project}</a>`;
+      let html = `<a href="index.html" style="margin-right: 0.5em;">Home</a> &gt; <a href="browse.html?project=${encodeURIComponent(project)}" style="margin-left: 0.5em;">${project}</a>`;
       if (relative) {
         let parts = relative.split('/');
         let path = '';
@@ -46,23 +108,36 @@
     fetch(`/api/list?project=${encodeURIComponent(project)}&relative=${encodeURIComponent(relative||'')}`)
       .then(r=>r.json())
       .then(data=>{
-        const ul = document.getElementById('file-list');
+        const table = document.getElementById('file-table');
         if (!data || !Array.isArray(data.entries)) {
-          ul.innerHTML = '<li>无法获取目录内容</li>';
+          table.innerHTML = '<tr><td>无法获取目录内容</td></tr>';
           return;
         }
         if (data.entries.length === 0) {
-          ul.innerHTML = '<li>目录为空</li>';
+          table.innerHTML = '<tr><td>目录为空</td></tr>';
           return;
         }
-        ul.innerHTML = data.entries.map(e => {
-          if (e.type === 'dir') {
-            return `<li class="dir">📁 <a href="browse.html?project=${encodeURIComponent(project)}&relative=${encodeURIComponent(e.relative)}">${e.name}</a></li>`;
-          } else {
-            return `<li class="file">📄 <a href="viewer.html?project=${encodeURIComponent(project)}&relative=${encodeURIComponent(e.relative)}">${e.name}</a></li>`;
-          }
-        }).join('');
+        // 表头
+        table.innerHTML = `<tr style="background:#e0e3e8;font-weight:bold;"><td style="padding:0.5em 0.7em;">名称</td><td style="padding:0.5em 0.7em;">类型</td><td style="padding:0.5em 0.7em;">Size</td><td style="padding:0.5em 0.7em;">Date</td></tr>` +
+          data.entries.map((e, i) => {
+            const isDir = e.type === 'dir';
+            const rowBg = i % 2 === 0 ? '#f8f8fa' : '#eaf2fb';
+            let size = e.size !== undefined ? (isDir ? '-' : formatSize(e.size)) : '-';
+            let date = e.mtime ? new Date(e.mtime).toLocaleString() : '-';
+            let nameHtml = isDir
+              ? `<span class="icon">📁</span><a href="browse.html?project=${encodeURIComponent(project)}&relative=${encodeURIComponent(e.relative)}">${e.name}</a>`
+              : `<span class="icon">📄</span><a href="viewer.html?project=${encodeURIComponent(project)}&relative=${encodeURIComponent(e.relative)}">${e.name}</a>`;
+            return `<tr style="background:${rowBg};"><td style="padding:0.3em 0.7em;">${nameHtml}</td><td style="padding:0.3em 0.7em;">${isDir ? '目录' : '文件'}</td><td style="padding:0.3em 0.7em;">${size}</td><td style="padding:0.3em 0.7em;">${date}</td></tr>`;
+          }).join('');
       });
+
+    // 文件大小格式化
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+      if (bytes < 1024*1024*1024) return (bytes/1024/1024).toFixed(1) + ' MB';
+      return (bytes/1024/1024/1024).toFixed(1) + ' GB';
+    }
   </script>
 </body>
 </html>
