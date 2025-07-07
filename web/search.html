@@ -34,8 +34,8 @@
 </head>
 <body>
   <div style="display: flex; align-items: center; gap: 1.2em; margin-bottom: 1.2em; flex-wrap: wrap;">
-    <a href="index.html" style="color:#2a7ae2;text-decoration:none;font-weight:bold;font-size:1.08em; white-space:nowrap;">项目列表 &gt;</a>
-    <span id="project-title" style="font-size:1.15em; font-weight:bold; color:#222; white-space:nowrap;"></span> &gt;
+    <a href="index.html" style="color:#2a7ae2;text-decoration:none;font-weight:bold;font-size:1.08em; white-space:nowrap;">项目列表</a> &gt;
+    <a id="project-link" href="#" style="font-size:1.15em; font-weight:bold; color:#2a7ae2; text-decoration:none; white-space:nowrap;"></a> &gt;
     <form id="searchForm" style="display:flex;align-items:center;gap:0.5em;margin:0;">
       <input type="text" id="keyword" placeholder="输入关键词" required style="margin:0;" />
       <button type="submit">搜索</button>
@@ -52,12 +52,15 @@
     // 读取项目配置
     fetch('projects.json').then(r=>r.json()).then(list=>{
       const p = list.find(x=>x.name===projectName);
+      const projectLink = document.getElementById('project-link');
       if (!p) {
-        document.getElementById('project-title').textContent = '未找到项目：'+projectName;
+        projectLink.textContent = '未找到项目：'+projectName;
+        projectLink.removeAttribute('href');
         document.getElementById('searchForm').style.display = 'none';
         return;
       }
-      document.getElementById('project-title').textContent = p.name;
+      projectLink.textContent = p.name;
+      projectLink.href = `search.html?project=${encodeURIComponent(p.name)}`;
     });
     const form = document.getElementById('searchForm');
     const resultsDiv = document.getElementById('results');
