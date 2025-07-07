@@ -79,15 +79,15 @@
     // 渲染可点击的面包屑路径
     function renderFileBreadcrumb() {
       if (!project || !relative) {
-        document.getElementById('file-breadcrumb').textContent = (project && relative) ? `/${project}/${relative}` : '';
+        document.getElementById('file-breadcrumb').textContent = (project && relative) ? `${project}/${relative}` : '';
         return;
       }
-      let html = `<a href="browse.html?project=${encodeURIComponent(project)}">/${project}</a>`;
+      let html = `<a href=\"browse.html?project=${encodeURIComponent(project)}\">${project}</a>`;
       const parts = relative.split('/');
       let path = '';
       for (let i = 0; i < parts.length - 1; i++) {
         path += (i > 0 ? '/' : '') + parts[i];
-        html += `/<a href="browse.html?project=${encodeURIComponent(project)}&relative=${encodeURIComponent(path)}">${parts[i]}</a>`;
+        html += `/<a href=\"browse.html?project=${encodeURIComponent(project)}&relative=${encodeURIComponent(path)}\">${parts[i]}</a>`;
       }
       html += `/${parts[parts.length-1]}`;
       document.getElementById('file-breadcrumb').innerHTML = html + (line ? `:${line}` : '');
