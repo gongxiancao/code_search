@@ -46,7 +46,7 @@
 <body>
   <div class="file" id="file" style="display: flex; align-items: center;">
     <a href="index.html" id="home-link" style="color: #2a7ae2; text-decoration: none; font-weight: bold; font-size: 1.08em; margin-right: 1.2em;">Home</a>
-    <span id="file-text" style="font-size: 1.15em;"></span>
+    <span id="file-breadcrumb" style="font-size: 1.15em;"></span>
     <button id="copy-btn" title="复制文件名:行号" style="margin-left: 1em; background: none; border: none; cursor: pointer; padding: 0.2em; display: flex; align-items: center;">
       <!-- SVG copy icon (clone-line from SVG Repo, www.svgrepo.com) -->
       <svg id="copy-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 36 36" style="vertical-align: middle; color: #888;"><path d="M6,6H22v4h2V6a2,2,0,0,0-2-2H6A2,2,0,0,0,4,6V22a2,2,0,0,0,2,2h4V22H6Z" fill="#888"/><path d="M30,12H14a2,2,0,0,0-2,2V30a2,2,0,0,0,2,2H30a2,2,0,0,0,2-2V14A2,2,0,0,0,30,12Zm0,18H14V14H30Z" fill="#bbb"/><polygon points="21 28 23 28 23 23 28 23 28 21 23 21 23 16 21 16 21 21 16 21 16 23 21 23 21 28" fill="#888"/><rect x="0" y="0" width="36" height="36" fill-opacity="0"/></svg>
@@ -76,8 +76,24 @@
     const project = getQuery('project');
     const relative = getQuery('relative');
     const line = parseInt(getQuery('line'), 10);
+    // 渲染可点击的面包屑路径
+    function renderFileBreadcrumb() {
+      if (!project || !relative) {
+        document.getElementById('file-breadcrumb').textContent = (project && relative) ? `/${project}/${relative}` : '';
+        return;
+      }
+      let html = `<a href="browse.html?project=${encodeURIComponent(project)}">/${project}</a>`;
+      const parts = relative.split('/');
+      let path = '';
+      for (let i = 0; i < parts.length - 1; i++) {
+        path += (i > 0 ? '/' : '') + parts[i];
+        html += `/<a href="browse.html?project=${encodeURIComponent(project)}&relative=${encodeURIComponent(path)}">${parts[i]}</a>`;
+      }
+      html += `/${parts[parts.length-1]}`;
+      document.getElementById('file-breadcrumb').innerHTML = html + (line ? `:${line}` : '');
+    }
+    renderFileBreadcrumb();
     const fileText = (project && relative) ? `/${project}/${relative}${line?(':'+line):''}` : '';
-    document.getElementById('file-text').textContent = fileText;
     // 复制按钮
     const copyBtn = document.getElementById('copy-btn');
     const copyIcon = document.getElementById('copy-icon');

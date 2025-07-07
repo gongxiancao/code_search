@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>项目目录浏览</title>
+  <style>
+    body { font-family: 'Segoe UI', 'PingFang SC', Arial, sans-serif; margin: 2em; background: #f6f8fa; }
+    a { color: #2a7ae2; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    ul { list-style: none; padding-left: 1.2em; }
+    .dir { font-weight: bold; color: #1558b0; }
+    .file { color: #444; }
+    .breadcrumb { margin-bottom: 1.2em; font-size: 1.08em; }
+    .breadcrumb a { color: #2a7ae2; }
+    .breadcrumb span { color: #888; }
+  </style>
+</head>
+<body>
+  <div class="breadcrumb" id="breadcrumb"></div>
+  <ul id="file-list"></ul>
+  <script>
+    function getQuery(name) {
+      const m = location.search.match(new RegExp('(?:[?&]' + name + '=)([^&]+)'));
+      return m ? decodeURIComponent(m[1]) : '';
+    }
+    const project = getQuery('project');
+    const relative = getQuery('relative');
+
+    // 路径格式面包屑导航
+    function renderBreadcrumb() {
+      if (!project) return;
+      let html = `<a href="index.html">项目列表</a> &gt; <a href="browse.html?project=${encodeURIComponent(project)}">${project}</a>`;
+      if (relative) {
+        let parts = relative.split('/');
+        let path = '';
+        for (let i = 0; i < parts.length; i++) {
+          path += (i > 0 ? '/' : '') + parts[i];
+          html += `/<a href="browse.html?project=${encodeURIComponent(project)}&relative=${encodeURIComponent(path)}">${parts[i]}</a>`;
+        }
+      }
+      document.getElementById('breadcrumb').innerHTML = html;
+    }
+    renderBreadcrumb();
+
+    // 获取目录内容
+    fetch(`/api/list?project=${encodeURIComponent(project)}&relative=${encodeURIComponent(relative||'')}`)
+      .then(r=>r.json())
+      .then(data=>{
+        const ul = document.getElementById('file-list');
+        if (!data || !Array.isArray(data.entries)) {
+          ul.innerHTML = '<li>无法获取目录内容</li>';
+          return;
+        }
+        if (data.entries.length === 0) {
+          ul.innerHTML = '<li>目录为空</li>';
+          return;
+        }
+        ul.innerHTML = data.entries.map(e => {
+          if (e.type === 'dir') {
+            return `<li class="dir">📁 <a href="browse.html?project=${encodeURIComponent(project)}&relative=${encodeURIComponent(e.relative)}">${e.name}</a></li>`;
+          } else {
+            return `<li class="file">📄 <a href="viewer.html?project=${encodeURIComponent(project)}&relative=${encodeURIComponent(e.relative)}">${e.name}</a></li>`;
+          }
+        }).join('');
+      });
+  </script>
+</body>
+</html>

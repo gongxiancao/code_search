@@ -115,6 +115,32 @@ app.get('/api/file', (req, res) => {
   }
 });
 
+
+// 目录浏览接口：返回子目录和文件列表
+app.get('/api/list', (req, res) => {
+  const { project, relative = '' } = req.query;
+  if (!project) return res.json({ entries: [] });
+  const projects = getProjects();
+  const proj = projects.find(p => p.name === project);
+  if (!proj) return res.json({ entries: [] });
+  const baseDir = proj.path;
+  const dir = relative ? path.join(baseDir, relative) : baseDir;
+  if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) return res.json({ entries: [] });
+  try {
+    const entries = fs.readdirSync(dir, { withFileTypes: true })
+      .filter(e => !e.name.startsWith('.'))
+      .map(e => ({
+        name: e.name,
+        type: e.isDirectory() ? 'dir' : 'file',
+        relative: relative ? (relative + '/' + e.name) : e.name
+      }))
+      .sort((a, b) => a.type === b.type ? a.name.localeCompare(b.name) : (a.type === 'dir' ? -1 : 1));
+    res.json({ entries });
+  } catch {
+    res.json({ entries: [] });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Code search web server running at http://localhost:${PORT}`);
 });
