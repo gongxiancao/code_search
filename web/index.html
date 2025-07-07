@@ -45,7 +45,10 @@
       }
       div.innerHTML = '<h2>请选择项目：</h2>' +
         '<ul style="list-style:none;padding:0;">' +
-        list.map(p=>`<li style="margin:1em 0;"><a href="search.html?project=${encodeURIComponent(p.name)}" style="font-size:1.15em;color:#2a7ae2;text-decoration:none;font-weight:bold;">${p.name}</a> <span style="color:#888;font-size:0.98em;">(${p.path})</span></li>`).join('') +
+        list.map(p=>{
+          let remark = p.remark ? ` <span style="color:#888;font-size:0.98em;">(${p.remark})</span>` : '';
+          return `<li style="margin:1em 0;"><a href="search.html?project=${encodeURIComponent(p.name)}" style="font-size:1.15em;color:#2a7ae2;text-decoration:none;font-weight:bold;">${p.name}</a>${remark}</li>`;
+        }).join('') +
         '</ul>';
     });
   </script>
