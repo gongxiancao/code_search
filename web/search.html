@@ -49,19 +49,16 @@
       return m ? decodeURIComponent(m[1]) : '';
     }
     const projectName = getQuery('project');
-    // 读取项目配置
-    fetch('projects.json').then(r=>r.json()).then(list=>{
-      const p = list.find(x=>x.name===projectName);
-      const projectLink = document.getElementById('project-link');
-      if (!p) {
-        projectLink.textContent = '未找到项目：'+projectName;
-        projectLink.removeAttribute('href');
-        document.getElementById('searchForm').style.display = 'none';
-        return;
-      }
-      projectLink.textContent = p.name;
-      projectLink.href = `search.html?project=${encodeURIComponent(p.name)}`;
-    });
+    // 直接用 query string 里的项目名
+    const projectLink = document.getElementById('project-link');
+    if (!projectName) {
+      projectLink.textContent = '未找到项目';
+      projectLink.removeAttribute('href');
+      document.getElementById('searchForm').style.display = 'none';
+    } else {
+      projectLink.textContent = projectName;
+      projectLink.href = `search.html?project=${encodeURIComponent(projectName)}`;
+    }
     const form = document.getElementById('searchForm');
     const resultsDiv = document.getElementById('results');
     form.onsubmit = (e) => {
