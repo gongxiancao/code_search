@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>项目代码搜索</title>
+  <link rel="stylesheet" href="common.css">
   <style>
-    body { font-family: 'Segoe UI', 'PingFang SC', Arial, sans-serif; margin: 2em; background: #f6f8fa; }
+    /* body 样式移至 common.css */
     input, button { font-size: 1em; border-radius: 4px; border: 1px solid #ccc; padding: 0.3em 0.7em; }
     button { background: #2a7ae2; color: #fff; border: none; cursor: pointer; transition: background 0.2s; }
     button:disabled { background: #ccc; cursor: not-allowed; }
@@ -32,7 +33,7 @@
     .pagination input { width: 3em; text-align: center; }
   </style>
 </head>
-<body>
+<body class="page-root">
   <div style="display: flex; align-items: center; gap: 1.2em; margin-bottom: 1.2em; flex-wrap: wrap;">
     <a href="index.html" style="color:#2a7ae2;text-decoration:none;font-weight:bold;font-size:1.08em; white-space:nowrap;">Home</a> &gt;
     <a id="project-link" href="#" style="font-size:1.15em; font-weight:bold; color:#2a7ae2; text-decoration:none; white-space:nowrap;"></a> &gt;

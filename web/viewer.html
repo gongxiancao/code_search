@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>代码预览</title>
+  <link rel="stylesheet" href="common.css">
   <style>
     /* highlightjs-line-numbers.js 行号右对齐 */
     .hljs-ln-numbers {
@@ -17,7 +18,7 @@
       flex-direction: column;
       align-items: flex-end;
     }
-    body { font-family: monospace; margin: 0; }
+    /* body 样式移至 common.css */
     .file { color: #2a7ae2; font-size: 1.1em; margin-bottom: 0.5em; }
     .line { color: #888; }
     .code { background: #f8f8f8; padding: 0; border-radius: 6px; overflow-x: auto; white-space: pre; font-family: 'Fira Mono', 'Menlo', 'Consolas', 'monospace'; margin: 0; }
@@ -43,7 +44,7 @@
     // hljs.registerLanguage('java', window.hljsDefineJava);
   </script>
 </head>
-<body>
+<body class="page-root">
   <div class="file" id="file" style="display: flex; align-items: center;">
     <a href="index.html" id="home-link" style="color: #2a7ae2; text-decoration: none; font-weight: bold; font-size: 1.08em; margin-right: 0.5em;">Home</a> &gt;
     <span id="file-breadcrumb" style="font-size: 1.15em; margin-left: 0.5em;"></span>
