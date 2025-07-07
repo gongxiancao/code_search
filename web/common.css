@@ -1,3 +1,26 @@
+/* 页面顶部通用样式 */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  font-size: 1.08em;
+  margin-bottom: 1.2em;
+  padding: 0.5em 1em 0.5em 1em;
+  color: #1558b0;
+  font-weight: bold;
+  flex-wrap: wrap;
+}
+.page-header a {
+  color: #2a7ae2;
+  font-weight: bold;
+  text-decoration: none;
+  margin: 0 0.1em;
+  transition: color 0.15s;
+}
+.page-header a:hover {
+  color: #1558b0;
+  text-decoration: underline;
+}
 /* 通用页面基础样式 */
 .page-root {
   font-family: 'Fira Mono', 'Menlo', 'Consolas', 'Segoe UI', 'PingFang SC', Arial, sans-serif;
