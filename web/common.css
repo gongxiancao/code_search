@@ -23,6 +23,7 @@
   color: #1558b0;
   font-weight: bold;
   flex-wrap: wrap;
+  border-bottom: 2.5px solid #ffb300;
 }
 .page-header a {
   color: #2a7ae2;

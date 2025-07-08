@@ -74,10 +74,26 @@
   </style>
 </head>
 <body class="page-root">
-  <div class="page-header" style="gap:1.2em;">
+  <div class="page-header">
     <a href="index.html" class="home-link">Home</a> &gt;
     <div class="breadcrumb" id="breadcrumb" style="margin:0;padding:0;"></div>
   </div>
+  <div style="display:flex;align-items:center;gap:1em;margin-bottom:1.2em;">
+    <form id="search-form" style="flex:1;display:flex;gap:0.5em;" action="search.html" method="get" onsubmit="return onSearchSubmit(event)">
+      <input type="hidden" name="project" id="search-project">
+      <input type="text" name="q" placeholder="代码搜索..." style="flex:1;padding:0.4em 0.8em;border-radius:5px;border:1px solid #bbb;font-size:1em;" required>
+      <button type="submit" style="padding:0.4em 1.1em;border-radius:5px;background:#2a7ae2;color:#fff;border:none;font-size:1em;cursor:pointer;">搜索</button>
+    </form>
+  </div>
+  <script>
+    // 搜索表单自动带上当前 project
+    document.getElementById('search-project').value = getQuery('project');
+    function onSearchSubmit(e) {
+      // 保证 project 参数传递
+      document.getElementById('search-project').value = getQuery('project');
+      return true;
+    }
+  </script>
   <table id="file-table" style="width:100%;border-collapse:separate;border-spacing:0;"></table>
   <script>
     function getQuery(name) {
