@@ -36,10 +36,13 @@
 <body class="page-root">
   <div class="page-header">
     <a href="index.html" class="home-link">Home</a> &gt;
-    <a id="project-link" href="#"></a> &gt;
-    <form id="searchForm" style="display:flex;align-items:center;gap:0.5em;margin:0;">
-      <input type="text" id="keyword" placeholder="输入关键词" required style="margin:0;" />
-      <button type="submit">搜索</button>
+    <a id="project-link" href="#"></a>
+  </div>
+  <div style="display:flex;align-items:center;gap:1em;margin-bottom:1.2em;">
+    <form id="searchForm" style="flex:1;display:flex;gap:0.5em;" action="search.html" method="get">
+      <input type="hidden" name="project" id="search-project">
+      <input type="text" id="keyword" name="keyword" placeholder="代码搜索..." style="flex:1;padding:0.4em 0.8em;border-radius:5px;border:1px solid #bbb;font-size:1em;" required />
+      <button type="submit" style="padding:0.4em 1.1em;border-radius:5px;background:#2a7ae2;color:#fff;border:none;font-size:1em;cursor:pointer;">搜索</button>
     </form>
   </div>
   <div id="results"></div>
@@ -62,12 +65,13 @@
     }
     const form = document.getElementById('searchForm');
     const resultsDiv = document.getElementById('results');
+    // 搜索表单自动带上当前 project
+    document.getElementById('search-project').value = projectName;
     form.onsubmit = (e) => {
-      e.preventDefault();
-      const keyword = document.getElementById('keyword').value.trim();
-      if (!keyword) return;
-      const params = new URLSearchParams({ project: projectName, keyword, page: 1, pageSize: 20 });
-      location.href = location.pathname + '?' + params.toString();
+      // 保证 project 参数传递
+      document.getElementById('search-project').value = projectName;
+      // 允许表单正常提交
+      return true;
     };
 
     // 页面加载时自动根据URL参数填充并搜索
