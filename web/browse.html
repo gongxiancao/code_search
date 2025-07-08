@@ -39,28 +39,6 @@
       display: flex;
       align-items: center;
     }
-    .breadcrumb {
-      font-size: 1.08em;
-      /* background: #f0f4f8; */
-      border-radius: 5px;
-      padding: 0.5em 1em;
-      color: #1558b0;
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .breadcrumb a {
-      color: #2a7ae2;
-      font-weight: bold;
-      margin: 0 0.1em;
-    }
-    .breadcrumb a:hover {
-      color: #1558b0;
-    }
-    .breadcrumb span {
-      color: #888;
-      margin: 0 0.1em;
-    }
     .icon {
       margin-right: 0.5em;
       font-size: 1.1em;
@@ -76,7 +54,7 @@
 <body class="page-root">
   <div class="page-header">
     <a href="index.html" class="home-link">Home</a> &gt;
-    <div class="breadcrumb" id="breadcrumb" style="margin:0;padding:0;"></div>
+    <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div style="display:flex;align-items:center;gap:1em;margin-bottom:1.2em;">
     <form id="search-form" style="flex:1;display:flex;gap:0.5em;" action="search.html" method="get" onsubmit="return onSearchSubmit(event)">
