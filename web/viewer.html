@@ -27,7 +27,28 @@
     .highlight { background: #ffe066; color: #222; }
     .ln { display: inline-block; width: 3em; text-align: right; color: #bbb; margin-right: 1em; }
     .hljs-ln-code { padding-left: 1em !important; }
-</style>
+    .search-float-btn {
+      position: absolute;
+      z-index: 99;
+      display: none;
+      background: #2a7ae2;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: box-shadow 0.2s;
+    }
+    .search-float-btn:hover {
+      background: #185bb5;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    }
+  </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
@@ -58,7 +79,9 @@
       </svg>
     </button>
   </div>
-  <div class="code"><pre><code id="code" class=""></code></pre></div>
+  <div class="code" style="position:relative;"><pre><code id="code" class=""></code></pre>
+    <button id="search-float-btn" class="search-float-btn" title="搜索选中代码">🔍</button>
+  </div>
   <script>
     // 获取 url 参数
     function getQuery(name) {
@@ -143,6 +166,54 @@
         }
       }, 0);
     });
+    // 悬浮搜索按钮逻辑
+    const searchBtn = document.getElementById('search-float-btn');
+    let lastSelection = '';
+    document.addEventListener('selectionchange', function() {
+      const sel = window.getSelection();
+      if (!sel.rangeCount) {
+        searchBtn.style.display = 'none';
+        return;
+      }
+      const range = sel.getRangeAt(0);
+      // 只响应 code 区域内的选中
+      if (!codeEl.contains(range.commonAncestorContainer)) {
+        searchBtn.style.display = 'none';
+        return;
+      }
+      const text = sel.toString().trim();
+      if (!text) {
+        searchBtn.style.display = 'none';
+        return;
+      }
+      lastSelection = text;
+      // 计算按钮位置：选区右下角
+      const rect = range.getBoundingClientRect();
+      const codeRect = codeEl.getBoundingClientRect();
+      // 相对 code 区域定位
+      searchBtn.style.left = (rect.right - codeRect.left + 8) + 'px';
+      searchBtn.style.top = (rect.bottom - codeRect.top - 16) + 'px';
+      searchBtn.style.display = 'flex';
+    });
+    // 失焦或点击其它区域隐藏按钮（仅在无选中内容时隐藏）
+    document.addEventListener('mousedown', function(e) {
+      setTimeout(() => {
+        const sel = window.getSelection();
+        const text = sel && sel.toString().trim();
+        if (!text) {
+          searchBtn.style.display = 'none';
+        }
+      }, 150);
+    });
+    // 点击按钮跳转搜索
+    searchBtn.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (lastSelection) {
+        window.location.href = `search.html?project=${encodeURIComponent(project)}&keyword=${encodeURIComponent(lastSelection)}`;
+        searchBtn.style.display = 'none';
+      }
+    };
   </script>
 </body>
 </html>
