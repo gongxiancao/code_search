@@ -83,14 +83,20 @@
         document.getElementById('file-breadcrumb').textContent = (project && relative) ? `${project}/${relative}` : '';
         return;
       }
-      let html = `<a href=\"browse.html?project=${encodeURIComponent(project)}\">${project}</a>`;
       const parts = relative.split('/');
+      let html = '';
       let path = '';
+      // 项目名
+      html += `<a href="browse.html?project=${encodeURIComponent(project)}">${project}</a>`;
+      // 目录部分
       for (let i = 0; i < parts.length - 1; i++) {
         path += (i > 0 ? '/' : '') + parts[i];
-        html += `/<a href=\"browse.html?project=${encodeURIComponent(project)}&relative=${encodeURIComponent(path)}\">${parts[i]}</a>`;
+        html += `/<a href="browse.html?project=${encodeURIComponent(project)}&relative=${encodeURIComponent(path)}">${parts[i]}</a>`;
       }
-      html += `/${parts[parts.length-1]}`;
+      // 文件名部分
+      if (parts.length) {
+        html += `/<a href="viewer.html?project=${encodeURIComponent(project)}&relative=${encodeURIComponent(relative)}">${parts[parts.length-1]}</a>`;
+      }
       document.getElementById('file-breadcrumb').innerHTML = html + (line ? `:${line}` : '');
     }
     renderFileBreadcrumb();
