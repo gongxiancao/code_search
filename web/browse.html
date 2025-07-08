@@ -74,7 +74,10 @@
   </style>
 </head>
 <body class="page-root">
-  <div class="page-header breadcrumb" id="breadcrumb"></div>
+  <div class="page-header" style="gap:1.2em;">
+    <a href="index.html" class="home-link">Home</a> &gt;
+    <div class="breadcrumb" id="breadcrumb" style="margin:0;padding:0;"></div>
+  </div>
   <table id="file-table" style="width:100%;border-collapse:separate;border-spacing:0;"></table>
   <script>
     function getQuery(name) {
@@ -87,7 +90,7 @@
     // 路径格式面包屑导航
     function renderBreadcrumb() {
       if (!project) return;
-      let html = `<a href="index.html" style="margin-right: 0.5em;">Home</a> &gt; <a href="browse.html?project=${encodeURIComponent(project)}" style="margin-left: 0.5em;">${project}</a>`;
+      let html = `<a href="browse.html?project=${encodeURIComponent(project)}">${project}</a>`;
       if (relative) {
         let parts = relative.split('/');
         let path = '';

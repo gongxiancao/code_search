@@ -1,3 +1,17 @@
+/* Home 链接统一样式 */
+.home-link {
+  color: #2a7ae2;
+  font-weight: bold;
+  font-size: 1.08em;
+  text-decoration: none;
+  margin-right: 0.5em;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+.home-link:hover {
+  color: #1558b0;
+  text-decoration: underline;
+}
 /* 页面顶部通用样式 */
 .page-header {
   display: flex;
